@@ -7,6 +7,43 @@ def debug(str):
     print("[DEBUG]", str)
 
 
+def md_sort(list_input_file):
+    markfiles = []
+    for file in list_input_file:
+        extension = file[-3:]
+        if extension == ".md":
+            markfiles.append(arg.input + "/" + file)
+
+    if len(markfiles) <= 0:
+        print("There is no markfiles in the input directory")
+        sys.exit()
+    else:
+        return markfiles
+
+
+def convert2html(line):
+    html_line = ""
+    if line[:1] == "#":
+        html_line = title_html(line)
+    elif line[:1] == "*":
+        html_line = ("<li>" + line[1:].rstrip() + " </li>")
+    else:
+        html_line = line
+    return html_line
+
+
+def title_html(line):
+    if line[:4] == "####":
+        html_line = ("<h4>" + line[4:].rstrip() + " </h4>")
+    elif line[:3] == "###":
+        html_line = ("<h3>" + line[3:].rstrip() + " </h3>")
+    elif line[:2] == "##":
+        html_line = ("<h2>" + line[2:].rstrip() + " </h2>")
+    elif line[:1] == "#":
+        html_line = ("<h1>" + line[1:].rstrip() + " </h1>")
+    return html_line
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input-directory",
                     type=str,
@@ -48,27 +85,17 @@ if not os.path.exists(arg.output):
 else:
     print(arg.output, "output directory already exist")
 
-list_input_file = os.listdir(arg.input)
-# debug(list_input_file)
-markfiles = []
+# Sorting files
 
-for file in list_input_file:
-    # debug(file)
-    extension = file[-3:]
-    if extension == ".md":
-        markfiles.append(arg.input + "/" + file)
-        debug(markfiles)
+list_input_files = os.listdir(arg.input)
+markfiles = md_sort(list_input_files)
 
-if len(markfiles) <= 0:
-    print("There is no markfiles in the input directory")
-    sys.exit()
+# Reading files
 
 for md_file in markfiles:
     with open(md_file) as file_to_read:
         for line in file_to_read:
-            if line[:3] == "###":
-                print(line)
-            elif line[:2] == "##":
-                print(line)
-            elif line[:1] == "#":
-                print(line)
+            # debug(convert2html(line))
+            output_file = open(arg.output+"/output.html", "a")
+            output_file.write(convert2html(line)+"\n")
+            output_file.close()

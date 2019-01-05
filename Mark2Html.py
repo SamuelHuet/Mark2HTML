@@ -1,6 +1,9 @@
 import argparse
 import os
-import sys
+import shutil
+import markdown2
+from markdown2 import Markdown
+from pathlib import Path
 
 
 def debug(str):
@@ -19,29 +22,6 @@ def md_sort(list_input_file):
         sys.exit()
     else:
         return markfiles
-
-
-def convert2html(line):
-    html_line = ""
-    if line[:1] == "#":
-        html_line = title_html(line)
-    elif line[:1] == "*":
-        html_line = ("<li>" + line[1:].rstrip() + " </li>")
-    else:
-        html_line = line
-    return html_line
-
-
-def title_html(line):
-    if line[:4] == "####":
-        html_line = ("<h4>" + line[4:].rstrip() + " </h4>")
-    elif line[:3] == "###":
-        html_line = ("<h3>" + line[3:].rstrip() + " </h3>")
-    elif line[:2] == "##":
-        html_line = ("<h2>" + line[2:].rstrip() + " </h2>")
-    elif line[:1] == "#":
-        html_line = ("<h1>" + line[1:].rstrip() + " </h1>")
-    return html_line
 
 
 parser = argparse.ArgumentParser()
@@ -88,14 +68,41 @@ else:
 # Sorting files
 
 list_input_files = os.listdir(arg.input)
-markfiles = md_sort(list_input_files)
+markdownfiles = md_sort(list_input_files)
 
-# Reading files
+# Translating files
 
-for md_file in markfiles:
-    with open(md_file) as file_to_read:
-        for line in file_to_read:
-            # debug(convert2html(line))
-            output_file = open(arg.output+"/output.html", "a")
-            output_file.write(convert2html(line)+"\n")
-            output_file.close()
+htmlfiles = []
+markdowner = Markdown()
+for markdownfile in markdownfiles:
+    with open(markdownfile, "r", encoding="utf-8") as f:
+        htmlfiles.append(markdowner.convert(f.read()))
+        title = os.path.basename(markdownfile)[:-3]
+    # Ajouter condition si template séléctionné
+    # with open(arg.output+"/"+title+".html", "x", encoding="utf-8") as f:
+    #    f.write(htmlfiles[-1])
+
+# Copying in template
+
+if arg.template is not None:
+    # Verifier qu'il n'y ai qu'un fichier markdown
+    template_files = os.listdir(arg.template)
+    exist = False
+    for template_file in template_files:
+        if template_file == "index.html":
+            exist = True
+    if exist == False:
+        print("No index.html found in template files")
+        sys.exit()
+
+    lines_template = []
+    with open(arg.template+"/index.html", "r", encoding="utf_8") as template:
+        for line in template:
+            lines_template.append(line)
+    index_replace_me = lines_template.index("[REPLACE_ME]\n")
+
+    # Copier les fichier du template dans l'output (sauf l'index)
+
+    lines_template[index_replace_me] = htmlfiles[0]
+    with open(arg.output+"/index.html", "x", encoding="utf-8") as index_file:
+        index_file.write("\n".join(lines_template))

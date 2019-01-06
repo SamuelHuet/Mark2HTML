@@ -56,5 +56,6 @@ Notez également que tous les fichiers sont conservés, aussi bien le fichier br
 * Verifier scrupuleusement l'existance des fichier renseignés
 * Verifier si les extension correspondent à ce qui est attendu
 * Erreur lorsque les fichiers .html à convertir existent déjà
+* Ajouter la conversion des liens URL 
 
 

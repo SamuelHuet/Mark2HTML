@@ -1,0 +1,67 @@
+<h1>Outil de conversion Markdown vers HTML</h1>
+
+<p>Cette outil est à l'origne un projet de classe proposé par Vincent Poulailleau, professeur de python. En résumé, l'objectif etait de creer un outil open source ou non, capable de convertir des fichier markdowns de notre choix vers des fichier HTML, avec la possibilité de fusioner ces derniers dans un template présélectionnés.
+La version complète de l'énoncé est disponible sur son GitHub :</p>
+
+<ul>
+<li>https://github.com/vpoulailleau/site_statique</li>
+</ul>
+
+<p>Ce fichier est déstiné à expliquer l'utilisation du programme.</p>
+
+<h2>Les Argument</h2>
+
+<p>Trois arguments sont disponibles pour ce programmes, sans compter l'aide :</p>
+
+<ul>
+<li>-i ou --input-directory 
+<ul>
+<li>renseigne le dossier dans lequel se trouvera les fichier markdowns à convertir.</li>
+</ul></li>
+<li>-o ou --output-directory
+<ul>
+<li>renseigne le dossier de sortis dans lequels seront créer les différents fichiers.</li>
+</ul></li>
+<li>-t ou --template-directory
+<ul>
+<li>renseigne le fichier à modifier afin d'y inclure votre code HTML.</li>
+</ul></li>
+<li>-h ou --help 
+<ul>
+<li>Affiche l'aide.</li>
+</ul></li>
+</ul>
+
+<h3>Précautions</h3>
+
+<p>Le fichier d'entré peut contenir tous types de dossier ou de fichier, seul les fichier *.md seront séléctionnés et leur noms seront conservé pour la création du fichier html. En revanche, le fichier de sortis devra être de préférence vide, ou des fichier pourraient être écrasés.
+Concernant le fichier template, il vous sera demandé si vous souhaitez conserver tous les fichier et dossier voisins dans le répertoire de sortis, dans ce cas, un dossier <code>/TEMPLATE</code> sera créé dans le répertoire de sortis et vous y retrouverez tous vos fichier convertis. 
+Notez que si les dossier d'entré et de sortis sont obligatoire, il n'en est pas de même pour le template. Dans le cas ou ce dernier n'est pas renseigné, les fichiers seront seulement convertis dans le dossier de sortis.</p>
+
+<h2>Exemple</h2>
+
+<p>J'ai joins à ce dossier dossier <code>/EXEMPLE</code> contenant des fichier, pour rester cohérent, considérez cela :
+<code>
+$ ls -l
+Mark2Html.py
+input/
+output/
+template/
+</code>
+On lance alors la commande :
+<code>
+$ python3.6 Mark2Html.py -i input/ -o output/ -t template/index.html
+template/index.html template selected
+output output directory already exist
+Do you want to copy template files in ouput directory ? (y/n) y
+DONE
+</code>
+Il est donc tout à fait possible de ne pas fusionner tous les fichier du template. Répondre <code>n</code> aura eu pour effet d'arreter le programme après la conversion et la fusion des fichiers.
+Notez également que tous les fichiers sont conservés, aussi bien le fichier brute convertis, que le fichier template convertis. </p>
+
+<h2>Bugs à corriger</h2>
+
+<ul>
+<li>Verifier scrupuleusement l'existance des fichier renseignés</li>
+<li>Erreur lorsque les fichiers .html à convertir existent déjà</li>
+</ul>

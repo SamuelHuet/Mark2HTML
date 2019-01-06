@@ -1,9 +1,11 @@
 import argparse
 import os
+import sys
 import shutil
 import markdown2
 from markdown2 import Markdown
 from pathlib import Path
+from shutil import copytree, ignore_patterns
 
 
 def debug(str):
@@ -51,8 +53,8 @@ if not os.path.exists(arg.input):
     sys.exit()
 
 if arg.template:
-    if not os.path.exists(arg.template):
-        print(arg.template, "template directory doesn't exist")
+    if not os.path.isfile(arg.template):
+        print(arg.template, "template file doesn't exist")
         sys.exit()
     else:
         print(arg.template, "template selected")
@@ -78,31 +80,38 @@ for markdownfile in markdownfiles:
     with open(markdownfile, "r", encoding="utf-8") as f:
         htmlfiles.append(markdowner.convert(f.read()))
         title = os.path.basename(markdownfile)[:-3]
-    # Ajouter condition si template séléctionné
-    # with open(arg.output+"/"+title+".html", "x", encoding="utf-8") as f:
-    #    f.write(htmlfiles[-1])
+    with open(arg.output+"/"+title+".html", "x", encoding="utf-8") as f:
+        f.write(htmlfiles[-1])
 
 # Copying in template
 
 if arg.template is not None:
-    # Verifier qu'il n'y ai qu'un fichier markdown
-    template_files = os.listdir(arg.template)
-    exist = False
-    for template_file in template_files:
-        if template_file == "index.html":
-            exist = True
-    if exist == False:
-        print("No index.html found in template files")
-        sys.exit()
+    list_output_files = os.listdir(arg.output)
 
-    lines_template = []
-    with open(arg.template+"/index.html", "r", encoding="utf_8") as template:
-        for line in template:
-            lines_template.append(line)
-    index_replace_me = lines_template.index("[REPLACE_ME]\n")
+    for output_file, html_translation in zip(list_output_files, htmlfiles):
+        lines_template = []
+        with open(arg.template, "r", encoding="utf_8") as template:
+            for line in template:
+                lines_template.append(line)
+        index_replace_me = lines_template.index("[REPLACE_ME]\n")
 
-    # Copier les fichier du template dans l'output (sauf l'index)
+        title = os.path.basename(output_file)[:-5]
 
-    lines_template[index_replace_me] = htmlfiles[0]
-    with open(arg.output+"/index.html", "x", encoding="utf-8") as index_file:
-        index_file.write("\n".join(lines_template))
+        lines_template[index_replace_me] = html_translation
+        with open(arg.output+"/"+title+"_template.html", "x", encoding="utf-8") as index_file:
+            index_file.write("\n".join(lines_template))
+
+    # Copying template files
+
+    print("Do you want to copy template files in ouput directory ? (y/n)", end=" ")
+    if input() == "y":
+        path = arg.template.replace(os.path.basename(arg.template), "")
+        shutil.copytree(path, arg.output+"/TEMPLATE",
+                        ignore=ignore_patterns(os.path.basename(arg.template)))
+        list_translated_template = os.listdir(arg.output)
+        for translated_template in list_translated_template:
+            if translated_template.find("_template.html") == -1:
+                list_translated_template.remove(translated_template)
+        for translated_template in list_translated_template:
+            shutil.copy(arg.output+"/"+translated_template, arg.output+"/TEMPLATE")
+print("DONE")

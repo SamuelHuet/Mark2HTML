@@ -6,6 +6,7 @@ import markdown2
 from markdown2 import Markdown
 from pathlib import Path
 from shutil import copytree, ignore_patterns
+import re
 
 
 def debug(str):
@@ -75,11 +76,20 @@ markdownfiles = md_sort(list_input_files)
 # Translating files
 
 htmlfiles = []
+url = []
 markdowner = Markdown()
 for markdownfile in markdownfiles:
     with open(markdownfile, "r", encoding="utf-8") as f:
+        # htmlfiles_url.append(f.read())
         htmlfiles.append(markdowner.convert(f.read()))
+        # htmlfiles_url.append(f.read())
         title = os.path.basename(markdownfile)[:-3]
+
+    urls = re.findall(
+        'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\), ]|(?:%[0-9a-fA-F][0-9a-fA-F]))[^<>()"]+', htmlfiles[-1])
+    for url in urls:
+        htmlfiles[-1] = htmlfiles[-1].replace(url, "<a href= "+url+" > "+url+" </a>")
+
     with open(arg.output+"/"+title+".html", "x", encoding="utf-8") as f:
         f.write(htmlfiles[-1])
 
